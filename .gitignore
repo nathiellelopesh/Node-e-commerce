@@ -1,0 +1,12 @@
+# Arquivos de ambiente e logs
+.env
+.env.*
+npm-debug.log
+yarn-debug.log
+
+# Diretório de dependências
+/node_modules
+
+# Diretório de build
+/dist
+/build
