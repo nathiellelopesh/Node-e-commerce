@@ -3,6 +3,6 @@ export interface User {
     email: string;
     password_hash: string;
     createdAt: Date,
-    deletedAt: Date,
-    customer: true
+    deletedAt: Date | null,
+    is_seller: boolean
 }

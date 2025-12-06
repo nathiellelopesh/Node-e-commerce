@@ -1,17 +1,17 @@
-// src/controllers/authController.ts
 import { Request, Response } from 'express';
 import { AuthService } from '../services/authentication.js';
+import { AuthenticatedRequest } from '../middlewares/AuthMiddleware.js'
 
 export const AuthController = {
     async handleRegistration(req: Request, res: Response) {
-        const { email, password, customer } = req.body;
+        const { email, password, is_seller, name } = req.body;
 
-        if (!email || !password || !customer) {
-            return res.status(400).json({ message: "Email, senha e tipo são obrigatórios." });
+        if (!email || !password || typeof is_seller === 'undefined' || !name) {
+            return res.status(400).json({ message: "Email, senha, nome e tipo são obrigatórios." });
         }
 
         try {
-            const user = await AuthService.registerUser(email, password, customer);
+            const user = await AuthService.registerUser(email, password, is_seller, name);
             
             if (user) {
                 return res.status(201).json({ 
@@ -36,15 +36,19 @@ export const AuthController = {
         try {
             const { session, user } = await AuthService.loginUser(email, password);
 
+            console.log(user)
+
             return res.status(200).json({
                 message: "Login bem-sucedido.",
                 access_token: session.access_token,
-                user_id: user.id
+                user_id: user.id,
+                is_seller: user.is_seller,
+                name: user.name, 
+                deleted_at: user.deletedAt
             });
 
         } catch (error) {
             const errorMessage = (error as Error).message;
-            // 401 (Unauthorized)
             return res.status(401).json({ message: errorMessage });
         }
     },
@@ -59,8 +63,8 @@ export const AuthController = {
         }
     },
 
-    async handleAccountDeactivation(req: Request, res: Response) {
-        const { userId } = req.body; 
+    async handleAccountDeactivation(req: AuthenticatedRequest, res: Response) {
+        const userId = req.user?.id;
 
         if (!userId) {
             return res.status(400).json({ message: "O ID do usuário é obrigatório para desativar a conta." });
@@ -68,9 +72,10 @@ export const AuthController = {
 
         try {
             await AuthService.deactivateAccount(userId);            
-            return res.status(200).json({ message: "Conta desativada com sucesso." });
+            return res.status(204).json({ message: "Conta desativada com sucesso." });
         } catch (error) {
             const errorMessage = (error as Error).message;
+            console.error("Erro na desativação de conta:", errorMessage);
             return res.status(500).json({ message: errorMessage });
         }
     },

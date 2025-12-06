@@ -6,6 +6,9 @@ interface DatabaseItem {
     createdAt?: Date;
     [key: string]: any;
 }
+interface Condition {
+    [key: string]: any;
+}
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_ANON_KEY;
@@ -20,12 +23,24 @@ export { supabase };
 const update = async <T extends DatabaseItem, U extends Partial<T>>(
     table: string, 
     data: U | U[], 
-    id: string | null
+    id: string | null,
+    condition?: Condition
 ): Promise<T[]> => {
 
     const dataToSend = Array.isArray(data) ? data : [data];
 
-    //console.log('dados (originais): ', data);
+    let query = supabase.from(table).upsert(dataToSend as any);
+
+    if (id !== null) {
+        query = query.eq('id', id);
+    }
+    
+    // (profile_id = sellerId)
+    if (condition) {
+        Object.entries(condition).forEach(([key, value]) => {
+            query = query.eq(key, value);
+        });
+    }
 
     if (id !== null && dataToSend.length > 0) {
         dataToSend[0]!.id = id;
@@ -52,10 +67,17 @@ const update = async <T extends DatabaseItem, U extends Partial<T>>(
     }
 };
 
-const drop = async (table: string, id: string) => {
+const drop = async (table: string, id: string, condition?: Condition) => {
     try {
-        console.log("id para excluir", id)
-        return await supabase.from(table).delete().eq("id", id);
+        let query = supabase.from(table).delete().eq("id", id);
+        
+        if (condition) {
+            Object.entries(condition).forEach(([key, value]) => {
+                query = query.eq(key, value);
+            });
+        }
+        
+        return await query;
     } catch (error) {
         throw error
     }

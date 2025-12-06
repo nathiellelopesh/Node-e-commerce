@@ -4,6 +4,7 @@ import csv from 'csv-parser';
 import { Product } from '../models/Product.js';
 
 const filePath = workerData.filePath;
+const sellerId = workerData.sellerId;
 const processedProducts: Omit<Product, 'id' | 'createdAt'>[] = [];
 
 fs.createReadStream(filePath)
@@ -19,6 +20,7 @@ fs.createReadStream(filePath)
             price: parseFloat(data.price),
             stock: parseInt(data.stock, 10),
             image: data.image || null,
+            profile_id: sellerId,
         };
         processedProducts.push(productData);
     })

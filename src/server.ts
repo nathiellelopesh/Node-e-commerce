@@ -1,11 +1,12 @@
 import express from 'express';
 import productRoutes from './routes/ProductRoutes.js';
+import authRoutes from './routes/UserRoutes.js';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 
 const app = express();
-const PORT = 3000;
+const PORT = 3030;
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -19,7 +20,7 @@ if (!fs.existsSync(uploadDir)) {
 
 app.use('/products', productRoutes);
 
-app.use('/users', productRoutes);
+app.use('/users', authRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`);
