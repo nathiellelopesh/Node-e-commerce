@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node --trace-uncaught --loader ts-node/esm src/server.ts"
+    "build": "tsc",
+    "dev": "node --trace-uncaught --loader ts-node/esm src/server.ts",
+    "start": "npm run build && node dist/server.js"
   },
   "keywords": [],
   "author": "",
