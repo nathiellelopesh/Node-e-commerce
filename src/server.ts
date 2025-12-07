@@ -2,7 +2,7 @@ import express from 'express';
 import productRoutes from './routes/ProductRoutes.js';
 import authRoutes from './routes/UserRoutes.js';
 import cartRoutes from './routes/CartRoutes.js'
-import favoriteRoutes from './routes/favoriteRouter.js'
+import favoriteRoutes from './routes/FavoriteRoutes.js'
 import salesRoutes from './routes/SalesRoutes.js'
 import reportRoutes from './routes/ReportRoutes.js'
 import * as fs from 'fs';
