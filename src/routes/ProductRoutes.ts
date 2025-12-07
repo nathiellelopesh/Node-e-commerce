@@ -7,18 +7,18 @@ const router = Router();
 
 router.use(protect);
 
-router.post('/', ProductController.createProduct); //ok
+router.post('/', ProductController.createProduct);
 
-router.post('/upload-csv', upload.single('file'), ProductController.uploadCsv); //ok
+router.post('/upload-csv', upload.single('file'), ProductController.uploadCsv);
 
-router.get('/inventory', ProductController.getProducts); //ok
+router.get('/inventory', ProductController.getProducts); 
 
 router.get('/:id', ProductController.getProductById);
 
 router.get('/', ProductController.getAllProducts)
 
-router.put('/:id', ProductController.updateProduct); //ok
+router.put('/:id', ProductController.updateProduct); 
 
-router.delete('/:id', ProductController.deleteProduct); //ok
+router.delete('/:id', ProductController.deleteProduct); 
 
 export default router;

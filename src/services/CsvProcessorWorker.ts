@@ -11,7 +11,7 @@ fs.createReadStream(filePath)
     .pipe(csv({
         separator: ',',
         skipComments: true,
-        headers: ['name', 'description', 'price', 'stock', 'createdAt', 'image'],
+        headers: ['name', 'description', 'price', 'stock', 'image'],
     }))
     .on('data', (data) => {
         const productData: Omit<Product, 'id' | 'createdAt'> = {
@@ -21,6 +21,7 @@ fs.createReadStream(filePath)
             stock: parseInt(data.stock, 10),
             image: data.image || null,
             profile_id: sellerId,
+            is_active: true,
         };
         processedProducts.push(productData);
     })

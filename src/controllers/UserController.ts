@@ -44,7 +44,7 @@ export const AuthController = {
                 user_id: user.id,
                 is_seller: user.is_seller,
                 name: user.name, 
-                deleted_at: user.deletedAt
+                deleted_at: user.deletedAt
             });
 
         } catch (error) {

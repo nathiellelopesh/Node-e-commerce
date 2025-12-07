@@ -7,4 +7,5 @@ export interface Product {
     createdAt: Date;
     image: string;
     profile_id: string;
+    is_active: boolean;
 }

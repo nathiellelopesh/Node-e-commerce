@@ -1,8 +1,9 @@
 export interface SaleItem {
-    id: number;
-    saleId: number; //chave estrangeira
-    productId: number; //chave estrangeira
+    id: string;
+    sale_id: string; 
+    product_id: string;
     quantity: number;
     unitPriceAtSale: number;
     subTotal: number;
+    created_at: Date;
 }

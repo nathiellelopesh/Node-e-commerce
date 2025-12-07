@@ -39,37 +39,27 @@ export class ProductService {
     }
 
     public static async findAllProducts(productName?: string): Promise<Product[]> {
-
         let query = supabase
             .from(PRODUCT_TABLE)
             .select('*')
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .eq('is_active', true);
+        
 
         if (productName) {
             console.log(`Filtro aplicado: nome = ${productName}`);
-            // Usa 'ilike' para busca parcial e case-insensitive (ignorando maiúsculas/minúsculas)
             query = query.ilike('name', `%${productName}%`); 
         }
 
         const { data, error } = await query;
 
-        if (error) {
-            console.error("Erro ao buscar produtos:", error);
-            throw error;
-        }
-        return data as Product[] || [];
-        /*
-        const { data, error } = await supabase
-            .from(PRODUCT_TABLE)
-            .select('*')
-            .order('created_at', { ascending: false });
+        console.log(data)
 
         if (error) {
             console.error("Erro ao buscar produtos:", error);
             throw error;
         }
         return data as Product[] || [];
-        */
     }
 
     public static async findProductById(productId: string): Promise<Product | undefined> {
@@ -109,5 +99,17 @@ export class ProductService {
             return false;
         }
         return status === 204;
+    }
+
+    public static async deactivateProductsBySeller(sellerId: string): Promise<void> {
+        const { error } = await supabase
+            .from('Products')
+            .update({ is_active: false })
+            .eq('profile_id', sellerId);
+
+        if (error) {
+            console.error("Erro ao desativar produtos do vendedor:", error);
+            throw new Error('Falha ao desativar produtos após desativação da conta.');
+        }
     }
 }

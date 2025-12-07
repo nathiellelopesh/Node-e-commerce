@@ -1,6 +1,7 @@
 import { supabase } from './supabase.js';
 import { User as SupabaseUser, Session } from '@supabase/supabase-js';
 import { User as LocalUser } from '../models/User.js';
+import { ProductService } from './ProductService.js';
 
 export const AuthService = {
     async registerUser(email: string, password: string, is_seller: boolean, name: string): Promise<SupabaseUser | null> {
@@ -97,71 +98,61 @@ export const AuthService = {
     },
 
     async getUserByToken(access_token: string): Promise<LocalUser | null> {
-    
-    const { data: { user }, error } = await supabase.auth.getUser(access_token);
+        const { data: { user }, error } = await supabase.auth.getUser(access_token);
 
-    if (error) {
-        console.error("Erro ao validar token:", error.message);
-        return null;
-    }
-
-    if (user) {
-        const { data: profileData, error: profileError } = await supabase
-                .from('profiles')
-                .select('name, deletedAt')
-                .eq('id', user.id)
-                .single();
-            
-            if (profileError) {
-                console.warn("Aviso: Falha ao carregar perfil do usuário:", profileError.message);
-            }
-
-        if (profileData?.deletedAt) {
-                 return null;
+        if (error) {
+            console.error("Erro ao validar token:", error.message);
+            return null;
         }
 
-        const is_seller_value = (user.user_metadata?.is_seller as boolean) || false;
-        
-        return {
-            id: user.id,
-            email: user.email!, 
-            is_seller: is_seller_value,
-            name: profileData?.name || user.email!.split('@')[0],
-            password_hash: '',
-            createdAt: new Date(user.created_at!),
-            deletedAt: profileData?.deletedAt || null,
-        } as LocalUser;
-    }
-    return null;
-},
+        if (user) {
+            const { data: profileData, error: profileError } = await supabase
+                    .from('profiles')
+                    .select('name, deletedAt')
+                    .eq('id', user.id)
+                    .single();
+                
+                if (profileError) {
+                    console.warn("Aviso: Falha ao carregar perfil do usuário:", profileError.message);
+                }
+
+            if (profileData?.deletedAt) {
+                return null;
+            }
+
+            const is_seller_value = (user.user_metadata?.is_seller as boolean) || false;
+            
+            return {
+                id: user.id,
+                email: user.email!, 
+                is_seller: is_seller_value,
+                name: profileData?.name || user.email!.split('@')[0],
+                password_hash: '',
+                createdAt: new Date(user.created_at!),
+                deletedAt: profileData?.deletedAt || null,
+            } as LocalUser;
+        }
+        return null;
+    },
 
     async deactivateAccount(userId: string): Promise<void> {
         const now = new Date().toISOString();
-
-        console.log("Iniciando desativação da conta para userId:", userId);
-
-        console.log("Valor de 'deletedAt' a ser enviado:", now);
 
         const { data, error: profileError } = await supabase
             .from('profiles')
             .update({ deletedAt: now })
             .eq('id', userId);
-        
-        console.log("Resultado da operação Supabase:");
-        console.log("Data de Retorno (data):", data);
 
         if (profileError) {
-            console.error("Erro ao desativar conta (Soft Delete):", profileError);
-            console.error("Mensagem de erro detalhada do Supabase:", profileError.message);
             throw new Error('Falha ao desativar a conta do usuário.');
         }
 
-        if (data && Array.isArray(data)) {
-            console.log(`Sucesso!`);
-        } else {
-            console.warn("Operação de atualização concluída, mas nenhum dado foi retornado (perfil não encontrado ou atualização falhou silenciosamente).");
+        try {
+            await ProductService.deactivateProductsBySeller(userId); 
+            console.log(`Sucesso: Todos os produtos de ${userId} marcados como inativos.`);
+        } catch (productError) {
+            console.error("AVISO: Falha ao desativar produtos:", productError);
         }
-
         await this.logoutUser(); 
-    },
+    }
 };

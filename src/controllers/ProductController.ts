@@ -100,16 +100,10 @@ export class ProductController {
         const sellerId = req.user?.id;       
         const isSeller = (req.user as any)?.is_seller;
 
-        console.log("Verificação de permissão para getProducts (Inventário):");
-        console.log("  - sellerId:", sellerId);
-        console.log("  - isSeller:", isSeller);
-
         if (!sellerId || !isSeller) {
             console.error("ERRO 403: Inventário negado. Motivo: sellerId ou isSeller não está presente/true.");
             return res.status(403).json({ message: "Acesso negado. Apenas vendedores podem visualizar seu inventário." });
         }
-
-        console.log(`Buscando produtos para o vendedor ID: ${sellerId}`);
         
         try {
             const products = await ProductService.findBySellerId(sellerId);
@@ -178,11 +172,7 @@ export class ProductController {
     }
 
     public static async getAllProducts(req: AuthenticatedRequest, res: Response) {
-        console.log(`Buscando todos os produtos.`);
-
         const filterProductName = req.query.name as string | undefined;
-
-        console.log(`Buscando produtos. Filtro de nome: ${filterProductName || 'Nenhum'}`);
         
         try {
             const products = await ProductService.findAllProducts(filterProductName);
